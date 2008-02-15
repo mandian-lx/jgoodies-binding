@@ -12,6 +12,7 @@ Group:          Development/Java
 URL:            http://www.jgoodies.com/freeware
 Source0:        http://www.jgoodies.com/download/libraries/%{short_name}/%{short_name}-%{cvs_version}.zip
 BuildRequires:  ant
+BuildRequires:  jgoodies-forms
 %if %{gcj_support}
 BuildRequires:  java-gcj-compat-devel
 BuildRequires:  java-1.5.0-gcj-javadoc
