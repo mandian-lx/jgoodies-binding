@@ -4,7 +4,7 @@
 
 Name:           jgoodies-%{short_name}
 Version:        2.0.2
-Release:        %mkrel 0.0.2
+Release:        %mkrel 0.0.3
 Epoch:          0
 Summary:        JGoodies Data Binding framework
 License:        BSD
