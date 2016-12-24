@@ -1,95 +1,95 @@
-%define gcj_support 1
-%define short_name binding
-%define cvs_version 2_0_2
+%define oname JGoodies
+%define shortoname Binding
+%define releasedate 20150121
 
-Name:           jgoodies-%{short_name}
-Version:        2.0.2
-Release:        %mkrel 0.0.3
-Epoch:          0
-Summary:        JGoodies Data Binding framework
-License:        BSD
-Group:          Development/Java
-URL:            http://www.jgoodies.com/freeware
-Source0:        http://www.jgoodies.com/download/libraries/%{short_name}/%{short_name}-%{cvs_version}.zip
-BuildRequires:  ant
-BuildRequires:  jgoodies-forms
-%if %{gcj_support}
-BuildRequires:  java-gcj-compat-devel
-BuildRequires:  java-1.5.0-gcj-javadoc
-%else
-BuildRequires:  java-devel >= 0:1.4.2
-BuildRequires:  java-javadoc
-BuildArch:      noarch
-%endif
-BuildRequires:  java-rpmbuild
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
+%define bname %(echo %oname | tr [:upper:] [:lower:])
+%define shortname %(echo %shortoname | tr [:upper:] [:lower:])
+
+%define version 2.13.0
+%define oversion %(echo %version | tr \. _)
+
+Summary:	Swing Data Binding Framework
+Name:		%{bname}-%{shortname}
+Version:	%{version}
+Release:	1
+License:	BSD
+Group:		Development/Java
+URL:		http://www.jgoodies.com/freeware/libraries/%{shortname}/
+Source0:	http://www.jgoodies.com/download/libraries/%{shortname}/%{name}-%{oversion}-%{releasedate}.zip
+# NOTE: Latest version of jgoodies libraries can't be freely download from
+#	from the official site. However official maven repo provides some
+#	more updated versions
+# Source0:	https://repo1.maven.org/maven2/com/%{bname}/%{name}/%{version}/%{name}-%{version}-sources.jar
+BuildArch:	noarch
+
+BuildRequires:	java-rpmbuild
+BuildRequires:	maven-local
+BuildRequires:	mvn(com.jgoodies:jgoodies-common) >= 1.8
+# The following are required for tests only
+BuildRequires:	x11-server-xvfb
+BuildRequires:	mvn(junit:junit)
+
+Requires:	java-headless >= 1.6
+Requires:	jpackage-utils
+Requires:	mvn(com.jgoodies:jgoodies-common) >= 1.8
 
 %description
-The JGoodies Binding connects object properties with UI components.
+The JGoodies Binding synchronizes object properties with Swing components.
+And it helps you represent the state and behavior of a presentation
+independently of the GUI components used in the interface.
 
-* reduces the code necessary for object presentation,
-* stream-lines the development process for data binding,
-* provides advanced features for automatic update notification,
-* assists you in separating the domain and presentation layers.
+The JGoodies Binding requires Java 6 or later.
+
+%files -f .mfiles
+%doc README.html
+%doc RELEASE-NOTES.txt
+%doc LICENSE.txt
+
+#----------------------------------------------------------------------------
 
 %package javadoc
-Summary:        Javadoc for jgoodies-binding
-Group:          Development/Java
+Summary:	Javadoc for %{oname} %{shortoname}
+Requires:	jpackage-utils
 
 %description javadoc
-Javadoc for jgoodies-binding.
+API documentation for %{oname} %{shortoname}.
+
+%files javadoc -f .mfiles-javadoc
+
+#----------------------------------------------------------------------------
 
 %prep
-%setup -q -n %{short_name}-%{version}
-%remove_java_binaries
-%{__rm} -r docs/api
-%{_bindir}/find . -type f -name '*.html' -o -type f -name '*.css' -o -type f -name '*.java' -o -type f -name '*.txt' | \
-  %{_bindir}/xargs -t %{__perl} -pi -e 's/\r$//g'
+%setup -q
+# Extract sources
+mkdir -p src/main/java/
+pushd src/main/java/
+%jar -xf ../../../%{name}-%{version}-sources.jar
+popd
+
+# Extract tests
+mkdir -p src/test/java/
+pushd src/test/java/
+%jar -xf ../../../%{name}-%{version}-tests.jar
+popd
+
+# Delete prebuild JARs and binaries and docs
+find . -name "*.jar" -delete
+find . -name "*.class" -delete
+rm -fr docs
+
+# Add the META-INF/INDEX.LIST to the jar archive (fix jar-not-indexed warning)
+%pom_add_plugin :maven-jar-plugin . "<configuration>
+	<archive>
+		<index>true</index>
+	</archive>
+</configuration>"
+
+# Fix Jar name
+%mvn_file :%{name} %{name}-%{version} %{name}
 
 %build
-export CLASSPATH=$(build-classpath jgoodies-forms)
-export OPT_JAR_LIST=:
-%{ant} -Dbuild.sysclasspath=first -Djavadoc.link=%{_javadocdir}/java compile jar javadoc
+xvfb-run -a %mvn_build
 
 %install
-%{__rm} -rf %{buildroot}
+%mvn_install
 
-%{__mkdir_p} %{buildroot}%{_javadir}
-%{__cp} -a build/%{short_name}.jar %{buildroot}%{_javadir}/%{name}-%{version}.jar
-%{__ln_s} %{name}-%{version}.jar %{buildroot}%{_javadir}/%{name}.jar
-%{__ln_s} %{name}-%{version}.jar %{buildroot}%{_javadir}/%{short_name}-%{version}.jar
-%{__ln_s} %{short_name}-%{version}.jar %{buildroot}%{_javadir}/%{short_name}.jar
-%{__mkdir_p} %{buildroot}%{_javadocdir}/%{name}-%{version}
-%{__cp} -a build/docs/api/* %{buildroot}%{_javadocdir}/%{name}-%{version}
-%{__ln_s} %{name}-%{version} %{buildroot}%{_javadocdir}/%{name}
-
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
-
-%clean
-%{__rm} -rf %{buildroot}
-
-%if %{gcj_support}
-%post
-%{update_gcjdb}
-
-%postun
-%{clean_gcjdb}
-%endif
-
-%files
-%defattr(0644,root,root,0755)
-%doc RELEASE-NOTES.txt
-%{_javadir}/%{short_name}*.jar
-%{_javadir}/%{name}*.jar
-%if %{gcj_support}
-%dir %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/*.jar.*
-%endif
-
-%files javadoc
-%defattr(0644,root,root,0755)
-%doc RELEASE-NOTES.txt README.html docs/ src/tutorial/ build/classes/tutorial/
-%{_javadocdir}/%{name}-%{version}
-%{_javadocdir}/%{name}
