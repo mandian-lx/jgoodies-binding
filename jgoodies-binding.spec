@@ -22,16 +22,14 @@ Source0:	http://www.jgoodies.com/download/libraries/%{shortname}/%{name}-%{overs
 # Source0:	https://repo1.maven.org/maven2/com/%{bname}/%{name}/%{version}/%{name}-%{version}-sources.jar
 BuildArch:	noarch
 
-BuildRequires:	java-rpmbuild
 BuildRequires:	maven-local
-BuildRequires:	mvn(com.jgoodies:jgoodies-common) >= 1.8
-# The following are required for tests only
-BuildRequires:	x11-server-xvfb
+BuildRequires:	jgoodies-common >= 1.8 #mvn(com.jgoodies:jgoodies-common)
+# The following is required for tests only
 BuildRequires:	mvn(junit:junit)
 
 Requires:	java-headless >= 1.6
 Requires:	jpackage-utils
-Requires:	mvn(com.jgoodies:jgoodies-common) >= 1.8
+Requires:	jgoodies-common >= 1.8 #mvn(com.jgoodies:jgoodies-common)
 
 %description
 The JGoodies Binding synchronizes object properties with Swing components.
@@ -49,6 +47,7 @@ The JGoodies Binding requires Java 6 or later.
 
 %package javadoc
 Summary:	Javadoc for %{oname} %{shortoname}
+Group:		Documentation
 Requires:	jpackage-utils
 
 %description javadoc
@@ -88,7 +87,7 @@ rm -fr docs
 %mvn_file :%{name} %{name}-%{version} %{name}
 
 %build
-xvfb-run -a %mvn_build
+%mvn_build
 
 %install
 %mvn_install
