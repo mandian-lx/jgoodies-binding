@@ -76,7 +76,7 @@ find . -name "*.jar" -delete
 find . -name "*.class" -delete
 rm -fr docs
 
-# Add the META-INF/INDEX.LIST to the jar archive (fix jar-not-indexed warning)
+# Fix jar-not-indexed warning
 %pom_add_plugin :maven-jar-plugin . "<configuration>
 	<archive>
 		<index>true</index>
