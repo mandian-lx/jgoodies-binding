@@ -1,3 +1,5 @@
+%{?_javapackages_macros:%_javapackages_macros}
+
 %define oname JGoodies
 %define shortoname Binding
 %define releasedate 20150121
@@ -22,15 +24,12 @@ Source0:	http://www.jgoodies.com/download/libraries/%{shortname}/%{name}-%{overs
 # Source0:	https://repo1.maven.org/maven2/com/%{bname}/%{name}/%{version}/%{name}-%{version}-sources.jar
 BuildArch:	noarch
 
-BuildRequires:	maven-local
-BuildRequires:	jgoodies-common >= 1.8 #mvn(com.jgoodies:jgoodies-common)
-# The followings are required for tests only
+BuildRequires:  maven-local
+BuildRequires:  mvn(com.jgoodies:jgoodies-common)
+BuildRequires:  mvn(junit:junit)
+BuildRequires:  mvn(org.sonatype.oss:oss-parent:pom:)
 BuildRequires:	fontconfig
 BuildRequires:	fonts-ttf-dejavu
-
-Requires:	java-headless >= 1.6
-Requires:	jpackage-utils
-Requires:	jgoodies-common >= 1.8 #mvn(com.jgoodies:jgoodies-common)
 
 %description
 The JGoodies Binding synchronizes object properties with Swing components.
